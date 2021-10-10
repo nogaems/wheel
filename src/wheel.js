@@ -1,7 +1,8 @@
-import { Segment, Header, Container, Modal, Button } from "semantic-ui-react";
-import { useContext, useState, useRef, useEffect } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
+import { Button, Container, Header, Modal, Segment } from "semantic-ui-react";
+
 import { StoreContext } from "./store";
-import { weightedRandom, toPercent } from "./utils";
+import { toPercent, weightedRandom } from "./utils";
 
 const Wheel = () => {
   const {
@@ -28,21 +29,105 @@ const Wheel = () => {
     setResultModalOpen(true);
   };
 
-  const draw = (ctx) => {
-    ctx.clearRect(0, 0, width, height);
+  const draw = (ctx, initialAngle = 0) => {
+    const offset = width / 60;
+    const border = 5;
+    const borderColor = "#000000";
+    const arrowColorLeft = "#cece00";
+    const arrowColorRight = "#fefe00";
+    const arrowW = width / 30;
+    const arrowH = height / 20;
+    const r = width / 2 - border - offset;
+    const cx = width / 2;
+    const cy = height / 2;
+    const desiredTextW = Math.round(0.8 * r); // text width is 80% of radius
+    const minTextH = 10;
+    const maxTextH = 100;
 
-    ctx.fillStyle = "#dadada";
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    ctx.translate(cx, cy);
+    ctx.rotate(initialAngle);
+
+    ctx.fillStyle = borderColor;
     ctx.beginPath();
-    ctx.arc(375, 375, 375, 0, 2 * Math.PI);
+    ctx.arc(0, 0, r + border, 0, 2 * Math.PI);
+    ctx.closePath();
     ctx.fill();
-    return;
+
+    for (let { title, weight, fg, bg } of items) {
+      const angle = 2 * Math.PI * weight;
+      const actualMaxTextH = Math.min(
+        maxTextH,
+        (r - desiredTextW / 2) *
+          1.6 *
+          Math.sin(Math.min(angle / 2, Math.PI / 2))
+      ); // actual maximal text height
+      // allowed because of sector size
+      const textMeasureIterationNum = Math.floor(
+        Math.log2(maxTextH - minTextH)
+      ); // number of iteration to adjust text width
+
+      ctx.fillStyle = bg;
+      ctx.strokeStype = borderColor;
+      ctx.beginPath();
+      ctx.arc(0, 0, r, 0, angle);
+      ctx.lineTo(0, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.rotate(angle / 2);
+      ctx.fillStyle = fg;
+
+      let textH = Math.round((actualMaxTextH - minTextH) / 2);
+      var step = textH / 2;
+      if (actualMaxTextH > minTextH) {
+        // if text's height fits in the sector
+        for (let i = 0; i < textMeasureIterationNum; i++) {
+          ctx.font = `${textH}px Verdana`;
+          var textW = ctx.measureText(title).width;
+          if (textW === desiredTextW) {
+            break;
+          } else if (textW < desiredTextW) {
+            textH += step;
+          } else {
+            // textW > desiredTextW)
+            textH -= step;
+          }
+          step /= 2;
+        }
+        textW = ctx.measureText(title).width;
+        const actualApproximateTextH = ctx.measureText("M").width;
+        ctx.fillText(title, r / 2 - textW / 2, actualApproximateTextH / 2);
+      }
+      ctx.rotate(angle / 2);
+    }
+
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = arrowColorLeft;
+    ctx.strokeStyle = borderColor;
+    ctx.beginPath();
+    ctx.moveTo(width / 2 - arrowW, 0);
+    ctx.lineTo(width / 2, arrowH / 3);
+    ctx.lineTo(width / 2, arrowH);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = arrowColorRight;
+    ctx.beginPath();
+    ctx.moveTo(width / 2 + arrowW, 0);
+    ctx.lineTo(width / 2, arrowH / 3);
+    ctx.lineTo(width / 2, arrowH);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
   };
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
 
-    draw(context);
+    draw(context, Math.PI);
     // eslint-disable-next-line
   }, [items]);
 
@@ -56,6 +141,7 @@ const Wheel = () => {
           width={`${width}px`}
           height={`${height}px`}
         >
+          {" "}
           Your browser does not seem to be supporting Canvas API
         </canvas>
       </Container>
