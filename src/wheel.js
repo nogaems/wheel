@@ -33,6 +33,7 @@ const Wheel = () => {
     const offset = width / 60;
     const border = 5;
     const borderColor = "#000000";
+    const backgroundColor = "#d2f1d9";
     const arrowColorLeft = "#cece00";
     const arrowColorRight = "#fefe00";
     const arrowW = width / 30;
@@ -44,14 +45,23 @@ const Wheel = () => {
     const minTextH = 10;
     const maxTextH = 100;
 
+    // reset identity matrix and clean up everything
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, width, height);
     ctx.translate(cx, cy);
     ctx.rotate(initialAngle);
 
+    // border
     ctx.fillStyle = borderColor;
     ctx.beginPath();
     ctx.arc(0, 0, r + border, 0, 2 * Math.PI);
+    ctx.closePath();
+    ctx.fill();
+
+    // background
+    ctx.fillStyle = backgroundColor;
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, 2 * Math.PI);
     ctx.closePath();
     ctx.fill();
 
