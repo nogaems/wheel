@@ -58,6 +58,7 @@ const Item = ({ index, title, fg, bg, weight }) => {
       setError("It's already on the list");
       return;
     }
+    if (!newColors[0] || !newColors[1]) return;
     const newItems = [...items];
     const item = newItems[index];
     item.title = newTitle;
