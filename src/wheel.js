@@ -98,6 +98,10 @@ const Wheel = () => {
         }
         textW = ctx.measureText(title).width;
         const actualApproximateTextH = ctx.measureText("M").width;
+        //&gordon | user: знаешь что самое прекрасное в этом всем?
+        //&gordon | никто никогда не узнает что эту строчку написал я https://github.com/nogaems/wheel/blob/master/src/wheel.js#L100
+        //&gordon | и я буду всё отрицать
+        //&gordon | если меня кто-то будет спрашивать
         ctx.fillText(title, r / 2 - textW / 2, actualApproximateTextH / 2);
       }
       ctx.rotate(angle / 2);
