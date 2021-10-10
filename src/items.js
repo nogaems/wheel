@@ -62,7 +62,7 @@ const Item = ({ index, title, fg, bg, weight }) => {
     const item = newItems[index];
     item.title = newTitle;
     item.weight = newWeight;
-    [item.fb, item.bg] = newColors;
+    [item.fg, item.bg] = newColors;
     setItems(newItems);
     setSaving(false);
     setEditOpened(false);
@@ -184,7 +184,7 @@ const ItemAddForm = () => {
     const [fg, bg] = colors;
     if (!(fg && bg)) return;
     // eslint-disable-next-line
-  }, [title, weight, colors]);
+  }, [title, weight, colors, unassignedProbability]);
 
   // eslint-disable-next-line
   const debouncedSetColors = useCallback(
