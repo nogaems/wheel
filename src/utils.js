@@ -16,7 +16,7 @@ function assignColors(title, setter) {
   });
 }
 
-const toPercent = (prob) => (prob * 100).toFixed(2);
+const toPercent = (prob) => `${(prob * 100).toFixed(2)}%`;
 
 const calcUnassignedProbability = (items) => {
   return (
@@ -34,10 +34,17 @@ const isAlreadyAdded = (item, list) => {
 const weightedRandom = (items) => {
   let sum = 0;
   let r = Math.random();
-  for (let { title, weight } of items) {
+  for (let index = 0; index < items.length; index++) {
+    let { title, weight } = items[index];
     sum += weight;
-    if (r <= sum) return { title, weight };
+    if (r <= sum) return { title, weight, index };
   }
+};
+
+const getRandomInt = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
 };
 
 export {
@@ -46,4 +53,5 @@ export {
   calcUnassignedProbability,
   isAlreadyAdded,
   weightedRandom,
+  getRandomInt,
 };

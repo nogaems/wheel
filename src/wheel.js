@@ -1,13 +1,15 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { Button, Container, Header, Modal, Segment } from "semantic-ui-react";
 
+import { isFulfilled } from "./items";
 import { StoreContext } from "./store";
-import { toPercent, weightedRandom } from "./utils";
+import { toPercent, weightedRandom, getRandomInt } from "./utils";
 
 const Wheel = () => {
   const {
     items: [items],
     history: [history, setHistory],
+    unassignedProbability,
   } = useContext(StoreContext);
 
   const [width, height] = [750, 750];
@@ -15,18 +17,89 @@ const Wheel = () => {
   const [result, setResult] = useState({ title: null, weight: null });
   const [resultModalOpen, setResultModalOpen] = useState(false);
 
-  const [spinning, setSpinning] = useState(false);
-  const [getsDragged, setGetsDragged] = useState(false);
+  const [offset, setOffset] = useState(Math.PI);
 
   const canvasRef = useRef(null);
 
   const onSpin = () => {
-    if (items.length < 1) return;
-    const { title, weight } = weightedRandom(items);
+    if (!isFulfilled(unassignedProbability)) {
+      // TODO: this must appear beneath the list to the right as a warning
+      alert(
+        `You have to fully assign the remaining probability of ${toPercent(
+          unassignedProbability
+        )} before spinning!`
+      );
+      return;
+    }
+    const { title, weight, index } = weightedRandom(items);
     setResult({ title, weight });
-    const histItem = { ts: Date.parse(Date()), title, weight };
-    setHistory([histItem, ...history]);
-    setResultModalOpen(true);
+    spin(index);
+  };
+
+  const spin = (targ_sector) => {
+    // Building somewhat realistic model of the process of spinning wheel is rather complicated
+    // and is not the aim of this project by any means.
+    // To make things look realistic at some level, I use a simplified approach to this
+    // problem by reducing the wheel spinning process to the case of motion with constant
+    // acceleration and utilize a modified version of Torricelli's equation for that.
+
+    // we need this because of floating point calculations
+    const eps = 0.001;
+    // the position (in radians) where we start to spin
+    const S0 = offset;
+    // the interval (in ms) of applying force, basically for how long the wheel accelerates
+    const t1 = 300;
+    // friction force coefficient, don't really try to make much sense of it,
+    // it just defines how long it's gonna take the wheel to stop
+    const f = 6e-7;
+
+    const targ_angle =
+      Math.PI *
+      (1 -
+        2 *
+          (items
+            .slice(0, targ_sector)
+            .map(({ weight }) => weight)
+            .reduce((prev, next) => prev + next, 0) +
+            items[targ_sector].weight * Math.random()));
+
+    // here we randomly add 12-15 more full spins so it looks more realistic
+    const S_targ = getRandomInt(12, 16) * (Math.PI * 2) + targ_angle;
+    const F =
+      ((1 / 2) *
+        (Math.sqrt(f * f * (t1 * t1) + 8 * (S_targ - S0) * f) - f * t1)) /
+      t1;
+
+    const calcAngle = (t) => {
+      if (t < t1) {
+        return (F * t * t) / 2 + S0;
+      } else {
+        const S_peak = (F * t1 * t1) / 2 + S0;
+        const v_peak = F * t1;
+        return (-f * (t - t1) * (t - t1)) / 2 + v_peak * (t - t1) + S_peak;
+      }
+    };
+
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+
+    const start = performance.now();
+
+    window.requestAnimationFrame(function animate(time) {
+      const t = time - start;
+      const angle = calcAngle(t);
+      draw(context, angle);
+      if (Math.abs(S_targ - angle) > eps) {
+        window.requestAnimationFrame(animate);
+      } else {
+        // the spinning is over
+        setOffset(targ_angle);
+        setResultModalOpen(true);
+        const { title, weight } = items[targ_sector];
+        const histItem = { ts: Date.parse(Date()), title, weight };
+        setHistory([histItem, ...history]);
+      }
+    });
   };
 
   const draw = (ctx, initialAngle = 0) => {
@@ -49,7 +122,7 @@ const Wheel = () => {
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, width, height);
     ctx.translate(cx, cy);
-    ctx.rotate(initialAngle);
+    ctx.rotate(initialAngle + Math.PI / 2);
 
     // border
     ctx.fillStyle = borderColor;
@@ -141,7 +214,7 @@ const Wheel = () => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
 
-    draw(context, Math.PI);
+    draw(context, offset);
     // eslint-disable-next-line
   }, [items]);
 
@@ -166,7 +239,7 @@ const Wheel = () => {
             <Header
               size="huge"
               textAlign="center"
-              content={`${result.title} (${toPercent(result.weight)}%)`}
+              content={`${result.title} (${toPercent(result.weight)})`}
             />
           </Modal.Description>
         </Modal.Content>

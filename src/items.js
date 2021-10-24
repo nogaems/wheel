@@ -21,11 +21,11 @@ import {
 import { StoreContext } from "./store";
 import { assignColors, toPercent, isAlreadyAdded } from "./utils";
 
-const minProb = 0.0001;
-const probStep = 0.0001;
-const epsilon = 0.0001;
+export const minProb = 0.0001;
+export const probStep = 0.0001;
+export const epsilon = 0.0001;
 
-const isFulfilled = (unassignedProbability) => {
+export const isFulfilled = (unassignedProbability) => {
   return Math.abs(unassignedProbability) < epsilon;
 };
 
@@ -85,7 +85,7 @@ const Item = ({ index, title, fg, bg, weight }) => {
             style={{ color: fg, backgroundColor: bg, alignSelf: "flex-start" }}
             size="large"
           >
-            {`${index + 1}) ${title} (${toPercent(weight)}%)`}
+            {`${index + 1}) ${title} (${toPercent(weight)})`}
           </Label>
         </Grid.Column>
         <Grid.Column width={2}>
@@ -130,7 +130,7 @@ const Item = ({ index, title, fg, bg, weight }) => {
                         setNewWeight(Number.parseFloat(e.target.value))
                       }
                     />
-                    {toPercent(newWeight)}%
+                    {toPercent(newWeight)}
                   </Form.Group>
                   {error && <Message error content={error} />}
                 </Form>
@@ -243,7 +243,7 @@ const ItemAddForm = () => {
           value={weight}
           onChange={(e) => setWeight(Number.parseFloat(e.target.value))}
         />
-        {`${toPercent(weight)}%`}
+        {`${toPercent(weight)}`}
         <Form.Button
           positive
           size="large"

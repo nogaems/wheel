@@ -12,7 +12,7 @@ const HistoryItem = ({ ts, title, weight }) => {
   return (
     <Grid.Row columns={1}>
       <Grid.Column>
-        {`${tsToString(ts)}: ${title} (${toPercent(weight)}%)`}
+        {`${tsToString(ts)}: ${title} (${toPercent(weight)})`}
       </Grid.Column>
     </Grid.Row>
   );
