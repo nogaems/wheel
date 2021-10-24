@@ -18,10 +18,12 @@ const Wheel = () => {
   const [resultModalOpen, setResultModalOpen] = useState(false);
 
   const [offset, setOffset] = useState(Math.PI);
+  const [isSpinning, setIsSpinning] = useState(false);
 
   const canvasRef = useRef(null);
 
   const onSpin = () => {
+    if (isSpinning) return;
     if (!isFulfilled(unassignedProbability)) {
       // TODO: this must appear beneath the list to the right as a warning
       alert(
@@ -84,6 +86,7 @@ const Wheel = () => {
     const context = canvas.getContext("2d");
 
     const start = performance.now();
+    setIsSpinning(true);
 
     window.requestAnimationFrame(function animate(time) {
       const t = time - start;
@@ -95,6 +98,7 @@ const Wheel = () => {
         // the spinning is over
         setOffset(targ_angle);
         setResultModalOpen(true);
+        setIsSpinning(false);
         const { title, weight } = items[targ_sector];
         const histItem = { ts: Date.parse(Date()), title, weight };
         setHistory([histItem, ...history]);
