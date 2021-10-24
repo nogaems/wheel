@@ -78,6 +78,8 @@ const Wheel = () => {
       } else {
         const S_peak = (F * t1 * t1) / 2 + S0;
         const v_peak = F * t1;
+        const t_end = t1 + v_peak / f;
+        if (t > t_end) return S_targ;
         return (-f * (t - t1) * (t - t1)) / 2 + v_peak * (t - t1) + S_peak;
       }
     };
