@@ -14,10 +14,10 @@ const App = () => {
         <Header.Content>Wheel of Unfortunate</Header.Content>
       </Header>
       <Grid columns={2}>
-        <Grid.Column width={9}>
+        <Grid.Column width={10} textAlign="center">
           <Wheel />
         </Grid.Column>
-        <Grid.Column width={7}>
+        <Grid.Column width={6}>
           <ItemList />
         </Grid.Column>
       </Grid>

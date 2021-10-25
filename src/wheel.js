@@ -1,9 +1,9 @@
 import { useContext, useEffect, useRef, useState } from "react";
-import { Button, Container, Header, Modal, Segment } from "semantic-ui-react";
+import { Button, Header, Modal, Segment, Rail } from "semantic-ui-react";
 
 import { isFulfilled } from "./items";
 import { StoreContext } from "./store";
-import { toPercent, weightedRandom, getRandomInt } from "./utils";
+import { getRandomInt, toPercent, weightedRandom } from "./utils";
 
 const Wheel = () => {
   const {
@@ -12,7 +12,10 @@ const Wheel = () => {
     unassignedProbability,
   } = useContext(StoreContext);
 
-  const [width, height] = [750, 750];
+  const width = Math.floor(window.innerWidth * 0.5);
+  const height = width;
+
+  // const [width, height] = [850, 850];
 
   const [result, setResult] = useState({ title: null, weight: null });
   const [resultModalOpen, setResultModalOpen] = useState(false);
@@ -226,18 +229,20 @@ const Wheel = () => {
 
   return (
     <Segment raised>
-      <Container text>
-        <Header size="medium" textAlign="center" content="Drag the wheel!" />
-        <canvas
-          ref={canvasRef}
-          onClick={onSpin}
-          width={`${width}px`}
-          height={`${height}px`}
-        >
-          {" "}
-          Your browser does not seem to be supporting Canvas API
-        </canvas>
-      </Container>
+      <Rail attached internal position="left" close="very">
+        <Segment compact>
+          <Header as="h3" textAlign="center" content="Drag the wheel!" />
+        </Segment>
+      </Rail>
+      <canvas
+        ref={canvasRef}
+        onClick={onSpin}
+        width={`${width}px`}
+        height={`${height}px`}
+      >
+        {" "}
+        Your browser does not seem to be supporting Canvas API
+      </canvas>
       <Modal open={resultModalOpen} onClose={() => setResultModalOpen(false)}>
         <Modal.Header content="Result" />
         <Modal.Content>
