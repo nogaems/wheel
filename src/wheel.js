@@ -53,7 +53,7 @@ const Wheel = () => {
     // the position (in radians) where we start to spin
     const S0 = offset;
     // the interval (in ms) of applying force, basically for how long the wheel accelerates
-    const t1 = 300;
+    const t1 = getRandomInt(200, 700);
     // friction force coefficient, don't really try to make much sense of it,
     // it just defines how long it's gonna take the wheel to stop
     const f = 6e-7;
@@ -68,8 +68,8 @@ const Wheel = () => {
             .reduce((prev, next) => prev + next, 0) +
             items[targ_sector].weight * Math.random()));
 
-    // here we randomly add 12-15 more full spins so it looks more realistic
-    const S_targ = getRandomInt(12, 16) * (Math.PI * 2) + targ_angle;
+    // here we randomly add 8-15 more full spins so it looks more realistic
+    const S_targ = getRandomInt(8, 16) * (Math.PI * 2) + targ_angle;
     const F =
       ((1 / 2) *
         (Math.sqrt(f * f * (t1 * t1) + 8 * (S_targ - S0) * f) - f * t1)) /
@@ -189,11 +189,11 @@ const Wheel = () => {
           step /= 2;
         }
         textW = ctx.measureText(title).width;
-        const actualApproximateTextH = ctx.measureText("M").width;
         //&gordon | user: знаешь что самое прекрасное в этом всем?
-        //&gordon | никто никогда не узнает что эту строчку написал я https://github.com/nogaems/wheel/blob/master/src/wheel.js#L100
+        //&gordon | никто никогда не узнает что эту строчку написал я
         //&gordon | и я буду всё отрицать
         //&gordon | если меня кто-то будет спрашивать
+        const actualApproximateTextH = ctx.measureText("M").width;
         ctx.fillText(title, r / 2 - textW / 2, actualApproximateTextH / 2);
       }
       ctx.rotate(angle / 2);
